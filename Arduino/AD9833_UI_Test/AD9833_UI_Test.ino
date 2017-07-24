@@ -1,11 +1,21 @@
 #include <Wire.h>
+#include <stdio.h>
 
 #define UART_TRACE  (1)
+
+#define TITLE_STR1  ("AD9833 FG")
+#define TITLE_STR2  ("20170724")
 
 // pin assign
 const int RE_A = 2;
 const int RE_B = 3;
 const int SW1 = 4;
+
+const int resetPin = 17;  // analog pin 3
+const int sdaPin = 18;    // analog pin 4
+const int sclPin = 19;    // analog pin 5
+const int i2cadr = 0x3e;
+const byte contrast = 32; // 最初は大きめにして調整する
 
 enum waveForm_t { wfSine, wfSquare, wfTriangle, wfIndexMax };
 
@@ -42,6 +52,8 @@ const int frequencyIndexMax = (sizeof(frequencyTable) / sizeof(uint32_t));
 int frequencyIndex = 0;
 int waveFormIndex = 0;
 
+const char strBuffer[80];
+
 //--------------------------------------------------------------------------------
 // Main routins
 //
@@ -53,7 +65,16 @@ void setup() {
 #if UART_TRACE
   Serial.begin(9600);
   Serial.println("AD9833 UI Test.");
+  sprintf(strBuffer, "%s %s", TITLE_STR1, TITLE_STR2);
+  Serial.println(strBuffer);
+  delay(1000);  
 #endif
+
+  // I2C LCD
+  lcd_init();
+  lcd_puts(TITLE_STR1);
+  lcd_move(0x40);
+  lcd_puts(TITLE_STR2);
 }
 
 void loop()
@@ -132,6 +153,64 @@ void displayParamsI2CLCD(uint32_t frequency, waveForm_t waveForm)
 {
 
 }
+
+//--------------------------------------------------------------------------------
+// akizuki AQM0802 / aitendo SPLC792-I2C
+//
+void lcd_cmd(byte x)
+{
+  Wire.beginTransmission(i2cadr);
+  Wire.write(0x00);
+  Wire.write(x);
+  Wire.endTransmission();
+}
+
+void lcd_data(byte x)
+{
+  Wire.beginTransmission(i2cadr);
+  Wire.write(0x40);
+  Wire.write(x);
+  Wire.endTransmission();
+}
+
+void lcd_puts(const char *s)
+{
+  while(*s) lcd_data(*s++);
+}
+
+void lcd_init()
+{
+  // reset
+  delay(500);
+  pinMode(resetPin, OUTPUT);
+  digitalWrite(resetPin, LOW);
+  delay(1);
+  digitalWrite(resetPin, HIGH);
+  delay(10);
+  // LCD initialize
+  delay(40);
+  Wire.begin();
+  lcd_cmd(0x38); // function set
+  lcd_cmd(0x39); // function set
+  lcd_cmd(0x14); // interval osc
+  lcd_cmd(0x70 | (contrast & 15)); // contrast low
+  lcd_cmd(0x5c | (contrast >> 4 & 3)); // contrast high / icon / power
+  lcd_cmd(0x6c); // follower control
+  delay(300);
+  lcd_cmd(0x38); // function set
+  lcd_cmd(0x0c); // display on
+  lcd_cmd(0x01); // clear display
+  delay(2);
+}
+
+void lcd_move(byte pos){
+  lcd_cmd(0x80 | pos);
+}
+
+void lcd_clear() {
+  lcd_cmd(0x01);
+}
+
 
 /*
 void AD9833setFrequency(uint32_t frequency, uint16_t Waveform) {
