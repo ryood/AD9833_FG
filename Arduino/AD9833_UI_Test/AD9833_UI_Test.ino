@@ -1,7 +1,7 @@
 #include <Wire.h>
 #include <stdio.h>
 
-#define UART_TRACE  (1)
+#define UART_TRACE  (0)
 
 #define TITLE_STR1  ("AD9833 FG")
 #define TITLE_STR2  ("20170724")
@@ -17,13 +17,22 @@ const int sclPin = 19;    // analog pin 5
 const int i2cadr = 0x3e;
 const byte contrast = 32; // 最初は大きめにして調整する
 
-enum waveForm_t { wfSine, wfSquare, wfTriangle, wfIndexMax };
+const int wfSine     = 0;
+const int wfSquare   = 1;
+const int wfTriangle = 2;
+const int wfIndexMax = 3;
 
 // mask of AD9833 Control Register
 const uint16_t waveFormTable[] = {
   0x2000, // Sine
   0x2020, // Square
   0x2002  // Triangle
+};
+
+const char waveFormName[][20] = {
+  "SIN               ",
+  "SQR               ",
+  "TRI               "  
 };
 
 const uint32_t frequencyTable[] = {
@@ -41,6 +50,9 @@ const uint32_t frequencyTable[] = {
   10000,
   20000,
   50000,
+  100000,
+  200000,
+  500000,
   1000000,
   2000000,
   5000000,
@@ -73,7 +85,8 @@ void setup() {
   // I2C LCD
   lcd_init();
   lcd_puts(TITLE_STR1);
-  lcd_move(0x40);
+  //lcd_move(0x40);
+  lcd_pos(1, 1);
   lcd_puts(TITLE_STR2);
 }
 
@@ -82,11 +95,12 @@ void loop()
   readParams();
 
   uint32_t frequency = frequencyTable[frequencyIndex];
-  waveForm_t waveForm = waveFormTable[waveFormIndex];
+  int waveForm = waveFormTable[waveFormIndex];
 
 #if UART_TRACE
   displayParamsSerial(frequency, waveForm);
 #endif
+  displayParamsI2CLCD(frequency, waveFormIndex);
 
 //  AD9833setFrequency(frequency, waveform);
 }
@@ -140,18 +154,33 @@ int readRE()
 // UI Display functions
 //
 #if UART_TRACE
-void displayParamsSerial(uint32_t frequency, waveForm_t waveForm)
+void displayParamsSerial(uint32_t frequency, int waveForm)
 {
+  Serial.print(waveFormIndex);
+  Serial.print('\t');
   Serial.print("0x");
   Serial.print(waveForm, HEX);
+
+  Serial.print('\t');
+  
+  Serial.print(frequencyIndex);
   Serial.print('\t');
   Serial.println(frequency);  
 }
 #endif
 
-void displayParamsI2CLCD(uint32_t frequency, waveForm_t waveForm)
+void displayParamsI2CLCD(uint32_t frequency, int waveFormIndex)
 {
+  //lcd_clear();
 
+  // 周波数表示
+  lcd_pos(0, 0);
+  sprintf(strBuffer, "%8luHz", frequency);
+  lcd_puts(strBuffer);
+
+  // 波形表示
+  lcd_pos(1, 0);
+  lcd_puts(waveFormName[waveFormIndex]);
 }
 
 //--------------------------------------------------------------------------------
@@ -203,8 +232,13 @@ void lcd_init()
   delay(2);
 }
 
+/*
 void lcd_move(byte pos){
   lcd_cmd(0x80 | pos);
+}
+*/
+void lcd_pos(byte raw, byte col) {
+  lcd_cmd(0x80 | ((raw & 0x01) << 6) | col);
 }
 
 void lcd_clear() {
