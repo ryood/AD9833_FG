@@ -140,10 +140,13 @@ void loop()
   if (frequencyIndex != prevFrequencyIndex || waveFormIndex != prevWaveFormIndex) {
     prevFrequencyIndex = frequencyIndex;
     prevWaveFormIndex = waveFormIndex;
-    displayParamsI2CLCD(frequency, waveFormIndex);
-  }
 
-//  AD9833setFrequency(frequency, waveform);
+    // LCDに表示
+    displayParamsI2CLCD(frequency, waveFormIndex);
+
+    // AD9833に出力
+    AD9833setFrequency(frequencyTable[frequencyIndex], waveFormTable[waveFormIndex]);
+  }
 }
 
 //--------------------------------------------------------------------------------
