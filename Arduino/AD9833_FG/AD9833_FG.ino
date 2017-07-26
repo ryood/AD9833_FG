@@ -5,7 +5,7 @@
 #define UART_TRACE  (0)
 
 #define TITLE_STR1  ("AD9833 FG")
-#define TITLE_STR2  ("20170724")
+#define TITLE_STR2  ("20170726")
 
 //--------------------------------------------------------------------------------
 // pin assign
@@ -13,7 +13,7 @@
 
 // AD8933
 const int FSYNC = 10;                       // Standard SPI pins for the AD9833 waveform generator.
-const int CLK = 13;                         // CLK and DATA pins are shared with the TFT display.
+const int CLK = 13;
 const int DATA = 11;
 
 // Rotary Encoder
@@ -30,7 +30,6 @@ const int sclPin = 19;    // analog pin 5
 const int i2cadr = 0x3e;
 const byte contrast = 32; // 最初は大きめにして調整する
 
-
 //--------------------------------------------------------------------------------
 // constants
 //
@@ -39,20 +38,17 @@ const float refFreq = 25000000.0;           // On-board crystal reference freque
 
 // Wave Form
 const int wfSine     = 0;
-const int wfSquare   = 1;
-const int wfTriangle = 2;
-const int wfIndexMax = 3;
+const int wfTriangle = 1;
+const int wfIndexMax = 2;
 
 // mask of AD9833 Control Register
 const uint16_t waveFormTable[] = {
   0x2000, // Sine
-  0x2020, // Square
   0x2002  // Triangle
 };
 
 const char waveFormName[][20] = {
   "SIN               ",
-  "SQR               ",
   "TRI               "  
 };
 
@@ -121,6 +117,8 @@ const uint32_t frequencyTable[] = {
   8000000,
   9000000,
   10000000,
+  11000000,
+  12000000,
 };
 
 const int frequencyIndexMax = (sizeof(frequencyTable) / sizeof(uint32_t));
