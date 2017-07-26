@@ -1,5 +1,6 @@
 #include <SPI.h>
 #include <Wire.h>
+#include <EEPROM.h>
 #include <stdio.h>
 
 #define UART_TRACE  (0)
@@ -28,7 +29,7 @@ const int resetPin = 17;  // analog pin 3
 const int sdaPin = 18;    // analog pin 4
 const int sclPin = 19;    // analog pin 5
 const int i2cadr = 0x3e;
-const byte contrast = 32; // 最初は大きめにして調整する
+const byte contrast = 50; // 最初は大きめにして調整する
 
 //--------------------------------------------------------------------------------
 // constants
@@ -130,8 +131,8 @@ const int frequencyIndexMax = (sizeof(frequencyTable) / sizeof(uint32_t));
 int frequencyIndex = 27; // 1kHz
 int waveFormIndex = 0;  // Sine wave
 
-int prevFrequencyIndex = frequencyIndex;
-int prevWaveFormIndex = waveFormIndex;
+int prevFrequencyIndex = -1;
+int prevWaveFormIndex = -1;
 
 const char strBuffer[80];
 
@@ -157,11 +158,16 @@ void setup() {
   //lcd_move(0x40);
   lcd_pos(1, 1);
   lcd_puts(TITLE_STR2);
+  delay(3000);
+
+  // EEPROMからパラメータを読み込み
+  eeLoadParams();
 
   // AD8933
   SPI.begin();
+  SPI.setDataMode(SPI_MODE2);
   delay(50);
-  
+
   AD9833reset();
   delay(50);
   AD9833setFrequency(frequencyTable[frequencyIndex], waveFormTable[wfSine]);
@@ -171,14 +177,14 @@ void loop()
 {
   readParams();
 
-  uint32_t frequency = frequencyTable[frequencyIndex];
-  int waveForm = waveFormTable[waveFormIndex];
-
 #if UART_TRACE
   displayParamsSerial(frequency, waveForm);
 #endif
 
   if (frequencyIndex != prevFrequencyIndex || waveFormIndex != prevWaveFormIndex) {
+    uint32_t frequency = frequencyTable[frequencyIndex];
+    int waveForm = waveFormTable[waveFormIndex];
+  
     prevFrequencyIndex = frequencyIndex;
     prevWaveFormIndex = waveFormIndex;
 
@@ -187,6 +193,9 @@ void loop()
 
     // AD9833に出力
     AD9833setFrequency(frequencyTable[frequencyIndex], waveFormTable[waveFormIndex]);
+
+    // EEPROMに保存
+    eeStoreParams();
   }
 }
 
@@ -363,7 +372,7 @@ void AD9833setFrequency(long frequency, int Waveform) {
 void WriteRegister(int dat) {
 
   // Display and AD9833 use different SPI MODES so it has to be set for the AD9833 here.
-  SPI.setDataMode(SPI_MODE2);
+  //SPI.setDataMode(SPI_MODE2);
 
   digitalWrite(FSYNC, LOW);           // Set FSYNC low before writing to AD9833 registers
   delayMicroseconds(10);              // Give AD9833 time to get ready to receive data.
@@ -374,6 +383,24 @@ void WriteRegister(int dat) {
   digitalWrite(FSYNC, HIGH);          //Write done. Set FSYNC high
 }
 
+//--------------------------------------------------------------------------------
+// EEPROM 
+//
+void eeStoreParams()
+{
+  int eeAddress = 0;
+  EEPROM.put(eeAddress, frequencyIndex);
+  eeAddress += sizeof(int);
+  EEPROM.put(eeAddress, waveFormIndex);  
+}
 
-
+void eeLoadParams()
+{
+  int eeAddress = 0;
+  EEPROM.get(eeAddress, frequencyIndex);
+  constrain(frequencyIndex, 0, frequencyIndexMax - 1);
+  eeAddress += sizeof(int);
+  EEPROM.get(eeAddress, waveFormIndex);
+  constrain(waveFormIndex, 0, wfIndexMax - 1);
+}
 
