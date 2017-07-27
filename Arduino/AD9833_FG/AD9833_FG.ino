@@ -139,7 +139,7 @@ int waveFormIndex = 0;  // Sine wave
 int prevFrequencyIndex = -1;
 int prevWaveFormIndex = -1;
 
-uint16_t batteryCheckCnt = 0;
+uint16_t batteryCheckCnt = 04;
 
 const char strBuffer[80];
 
@@ -227,7 +227,15 @@ void readParams()
     frequencyIndex = frequencyIndexMax - 1;
   }
 
-  // 波形設定SWの読み取り
+  // 波形設定SWの読み取り (トグルスイッチ)
+  if (digitalRead(SW1) == LOW) {
+    waveFormIndex = 0;
+  }
+  else {
+    waveFormIndex = 1;
+  }
+
+  /*
   if (digitalRead(SW1) == LOW) {
     waveFormIndex++;
     if (waveFormIndex >= wfIndexMax) {
@@ -235,6 +243,7 @@ void readParams()
     }
     delay(200); // (とりあえず)チャタリング防止
   }
+  */
 }
 
 // Rotary Encoderの読み取り akizuki/Alps
