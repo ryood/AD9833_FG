@@ -8,6 +8,8 @@
 #define TITLE_STR1  ("AD9833 FG")
 #define TITLE_STR2  ("20170726")
 
+#define BATTERY_CHECK_CYCLE (1000)
+
 //--------------------------------------------------------------------------------
 // pin assign
 //
@@ -31,6 +33,9 @@ const int sclPin = 19;    // analog pin 5
 const int i2cadr = 0x3e;
 const byte contrast = 50; // 最初は大きめにして調整する
 
+// Battery Check
+const int batteryPin = 0; // analog pin 0 (0..1.1V)
+
 //--------------------------------------------------------------------------------
 // constants
 //
@@ -49,8 +54,8 @@ const uint16_t waveFormTable[] = {
 };
 
 const char waveFormName[][20] = {
-  "SIN               ",
-  "TRI               "  
+  "SIN     ",
+  "TRI     "  
 };
 
 const uint32_t frequencyTable[] = {  
@@ -134,6 +139,8 @@ int waveFormIndex = 0;  // Sine wave
 int prevFrequencyIndex = -1;
 int prevWaveFormIndex = -1;
 
+uint16_t batteryCheckCnt = 0;
+
 const char strBuffer[80];
 
 //--------------------------------------------------------------------------------
@@ -174,7 +181,7 @@ void setup() {
 }
 
 void loop()
-{
+{  
   readParams();
 
 #if UART_TRACE
@@ -197,6 +204,13 @@ void loop()
     // EEPROMに保存
     eeStoreParams();
   }
+
+  // 電源電圧チェック
+  if (batteryCheckCnt == 0) {
+    batteryCheckCnt = BATTERY_CHECK_CYCLE;
+    checkBattery();
+  }
+  batteryCheckCnt--;
 }
 
 //--------------------------------------------------------------------------------
@@ -404,3 +418,24 @@ void eeLoadParams()
   constrain(waveFormIndex, 0, wfIndexMax - 1);
 }
 
+//--------------------------------------------------------------------------------
+// Battery Check
+//
+void checkBattery()
+{
+  analogReference(INTERNAL);
+  
+  int v = analogRead(batteryPin);
+  int v10 = (long)v * 50 / 1024;
+  
+  int int_part = v10 / 10;
+  int dec_part = v10 % 10 ;
+
+  lcd_pos(1, 8);
+  if (v >= 1023) {
+    lcd_puts("  >5.0V");
+  } else {
+    sprintf(strBuffer, "   %d.%dV", int_part, dec_part);
+    lcd_puts(strBuffer);
+  }
+}
