@@ -3,7 +3,8 @@
 #include <EEPROM.h>
 #include <stdio.h>
 
-#define UART_TRACE  (0)
+#define UART_TRACE  (0) // UARTにデバッグ情報を出力する場合は1にする。
+#define CLOCK_8MHZ  (1) // 8MHz駆動する場合1にする。
 
 #define TITLE_STR1  ("AD9833 FG")
 #define TITLE_STR2  ("20170726")
@@ -156,7 +157,7 @@ void setup() {
   Serial.println("AD9833 UI Test.");
   sprintf(strBuffer, "%s %s", TITLE_STR1, TITLE_STR2);
   Serial.println(strBuffer);
-  delay(1000);  
+  my_delay(1000);  
 #endif
 
   // I2C LCD
@@ -165,7 +166,7 @@ void setup() {
   //lcd_move(0x40);
   lcd_pos(1, 1);
   lcd_puts(TITLE_STR2);
-  delay(3000);
+  my_delay(3000);
 
   // EEPROMからパラメータを読み込み
   eeLoadParams();
@@ -173,10 +174,10 @@ void setup() {
   // AD8933
   SPI.begin();
   SPI.setDataMode(SPI_MODE2);
-  delay(50);
+  my_delay(50);
 
   AD9833reset();
-  delay(50);
+  my_delay(50);
   AD9833setFrequency(frequencyTable[frequencyIndex], waveFormTable[wfSine]);
 }
 
@@ -214,6 +215,17 @@ void loop()
 }
 
 //--------------------------------------------------------------------------------
+// Utility
+//
+void my_delay(unsigned long ms) {
+#if CLOCK_8MHZ
+  delay(ms / 2 + 1);
+#else
+  delay(ms);
+#endif
+}
+
+//--------------------------------------------------------------------------------
 // UI Input functions
 //
 void readParams()
@@ -235,13 +247,14 @@ void readParams()
     waveFormIndex = 1;
   }
 
-  /*
+  /* 
+  // 波形設定SWの読み取り (タクトスイッチ)
   if (digitalRead(SW1) == LOW) {
     waveFormIndex++;
     if (waveFormIndex >= wfIndexMax) {
       waveFormIndex = 0;  // wfSine;
     }
-    delay(200); // (とりあえず)チャタリング防止
+    my_delay(200); // (とりあえず)チャタリング防止
   }
   */
 }
@@ -263,7 +276,7 @@ int readRE()
     retVal = -1;
     break;
   }
-  delay(1);  // (とりあえず)チャタリング防止
+  my_delay(1);  // (とりあえず)チャタリング防止
   return retVal;
 }
 
@@ -327,14 +340,14 @@ void lcd_puts(const char *s)
 void lcd_init()
 {
   // reset
-  delay(500);
+  my_delay(500);
   pinMode(resetPin, OUTPUT);
   digitalWrite(resetPin, LOW);
-  delay(1);
+  my_delay(1);
   digitalWrite(resetPin, HIGH);
-  delay(10);
+  my_delay(10);
   // LCD initialize
-  delay(40);
+  my_delay(40);
   Wire.begin();
   lcd_cmd(0x38); // function set
   lcd_cmd(0x39); // function set
@@ -342,11 +355,11 @@ void lcd_init()
   lcd_cmd(0x70 | (contrast & 15)); // contrast low
   lcd_cmd(0x5c | (contrast >> 4 & 3)); // contrast high / icon / power
   lcd_cmd(0x6c); // follower control
-  delay(300);
+  my_delay(300);
   lcd_cmd(0x38); // function set
   lcd_cmd(0x0c); // display on
   lcd_cmd(0x01); // clear display
-  delay(2);
+  my_delay(2);
 }
 
 /*
@@ -370,7 +383,7 @@ void lcd_clear() {
 // AD9833 documentation advises a 'Reset' on first applying power.
 void AD9833reset() {
   WriteRegister(0x100);   // Write '1' to AD9833 Control register bit D8.
-  delay(10);
+  my_delay(10);
 }
 
 // Set the frequency and waveform registers in the AD9833.
