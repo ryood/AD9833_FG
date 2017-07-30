@@ -7,7 +7,7 @@
 #define CLOCK_8MHZ  (1) // 8MHz駆動する場合1にする。
 
 #define TITLE_STR1  ("AD9833 FG")
-#define TITLE_STR2  ("20170726")
+#define TITLE_STR2  ("20170730")
 
 #define BATTERY_CHECK_CYCLE (1000)
 
@@ -448,16 +448,10 @@ void checkBattery()
   analogReference(INTERNAL);
   
   int v = analogRead(batteryPin);
-  int v10 = (long)v * 50 / 1024;
+  int percentage = (long)v * 100 / 1023;
   
-  int int_part = v10 / 10;
-  int dec_part = v10 % 10 ;
-
+  sprintf(strBuffer, "%7d\%%", percentage);
   lcd_pos(1, 8);
-  if (v >= 1023) {
-    lcd_puts("  >5.0V");
-  } else {
-    sprintf(strBuffer, "   %d.%dV", int_part, dec_part);
-    lcd_puts(strBuffer);
-  }
+  lcd_puts(strBuffer);
 }
+
