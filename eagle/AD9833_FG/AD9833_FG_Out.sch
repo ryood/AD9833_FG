@@ -14405,7 +14405,7 @@ DIN A4, landscape with location and doc. field</description>
 <instance part="AGND8" gate="VR1" x="167.64" y="104.14"/>
 <instance part="FRAME1" gate="G$1" x="0" y="0"/>
 <instance part="SL1" gate="G$1" x="73.66" y="83.82" rot="MR180"/>
-<instance part="SL2" gate="G$1" x="172.72" y="78.74" rot="R180"/>
+<instance part="SL2" gate="G$1" x="172.72" y="76.2" rot="MR0"/>
 <instance part="SL3" gate="G$1" x="76.2" y="116.84"/>
 </instances>
 <busses>
@@ -14449,7 +14449,7 @@ DIN A4, landscape with location and doc. field</description>
 <segment>
 <wire x1="160.02" y1="76.2" x2="160.02" y2="63.5" width="0.1524" layer="91"/>
 <pinref part="AGND2" gate="VR1" pin="AGND"/>
-<pinref part="SL2" gate="G$1" pin="2"/>
+<pinref part="SL2" gate="G$1" pin="1"/>
 <wire x1="160.02" y1="76.2" x2="165.1" y2="76.2" width="0.1524" layer="91"/>
 </segment>
 <segment>
@@ -14500,7 +14500,7 @@ DIN A4, landscape with location and doc. field</description>
 <wire x1="152.4" y1="66.04" x2="152.4" y2="78.74" width="0.1524" layer="91"/>
 <pinref part="IC1" gate="B" pin="OUT"/>
 <wire x1="152.4" y1="78.74" x2="149.86" y2="78.74" width="0.1524" layer="91"/>
-<pinref part="SL2" gate="G$1" pin="1"/>
+<pinref part="SL2" gate="G$1" pin="2"/>
 <wire x1="152.4" y1="78.74" x2="165.1" y2="78.74" width="0.1524" layer="91"/>
 <junction x="152.4" y="78.74"/>
 </segment>
