@@ -4,12 +4,12 @@
 #include <stdio.h>
 
 #define UART_TRACE  (0) // UARTにデバッグ情報を出力する場合は1にする。
-#define CLOCK_8MHZ  (1) // 8MHz駆動する場合1にする。
+#define CLOCK_8MHZ  (0) // 8MHz駆動する場合1にする。
 
 #define TITLE_STR1  ("AD9833 FG")
-#define TITLE_STR2  ("20170730")
+#define TITLE_STR2  ("20170807")
 
-#define BATTERY_CHECK_CYCLE (1000)
+#define BATTERY_CHECK_CYCLE (100)
 
 //--------------------------------------------------------------------------------
 // pin assign
@@ -126,6 +126,7 @@ const uint32_t frequencyTable[] = {
   10000000,
   11000000,
   12000000,
+  12499999,
 };
 
 const int frequencyIndexMax = (sizeof(frequencyTable) / sizeof(uint32_t));
@@ -166,7 +167,7 @@ void setup() {
   //lcd_move(0x40);
   lcd_pos(1, 1);
   lcd_puts(TITLE_STR2);
-  my_delay(3000);
+  my_delay(1000);
 
   // EEPROMからパラメータを読み込み
   eeLoadParams();
@@ -239,6 +240,7 @@ void readParams()
     frequencyIndex = frequencyIndexMax - 1;
   }
 
+  /*
   // 波形設定SWの読み取り (トグルスイッチ)
   if (digitalRead(SW1) == LOW) {
     waveFormIndex = 0;
@@ -246,8 +248,8 @@ void readParams()
   else {
     waveFormIndex = 1;
   }
-
-  /* 
+  */
+  
   // 波形設定SWの読み取り (タクトスイッチ)
   if (digitalRead(SW1) == LOW) {
     waveFormIndex++;
@@ -256,7 +258,6 @@ void readParams()
     }
     my_delay(200); // (とりあえず)チャタリング防止
   }
-  */
 }
 
 // Rotary Encoderの読み取り akizuki/Alps
@@ -448,10 +449,13 @@ void checkBattery()
   analogReference(INTERNAL);
   
   int v = analogRead(batteryPin);
-  int percentage = (long)v * 100 / 1023;
+  float voltage = ((float)v / 1024.f) * 10.0f;
+
+  int v_real    = (int)voltage;  // 整数部
+  int v_decimal = (int)((voltage - v_real) * 10); // 小数部１桁
   
-  sprintf(strBuffer, "%7d\%%", percentage);
-  lcd_pos(1, 8);
+  sprintf(strBuffer, "%4d %4d.%d\V%", v, v_real, v_decimal);
+  lcd_pos(1, 4);
   lcd_puts(strBuffer);
 }
 
