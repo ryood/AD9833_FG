@@ -14999,7 +14999,7 @@ Source: http://www.bourns.com/data/global/PDFs/3223.PDF</description>
 <parts>
 <part name="JP1" library="pinhead" deviceset="PINHD-1X3" device="" value="RE"/>
 <part name="JP2" library="pinhead" deviceset="PINHD-1X2" device="" value="SW"/>
-<part name="IC1" library="mylib2" deviceset="ATMEGA48/88/168" device=""/>
+<part name="IC1" library="mylib2" deviceset="ATMEGA48/88/168" device="" value="ATMEGA328P"/>
 <part name="IC2" library="mylib2" deviceset="AD9833_MODULE" device=""/>
 <part name="GND1" library="supply1" deviceset="GND" device=""/>
 <part name="GND2" library="supply1" deviceset="GND" device=""/>

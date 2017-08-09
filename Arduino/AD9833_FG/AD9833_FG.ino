@@ -9,7 +9,7 @@
 #define TITLE_STR1  ("AD9833 FG")
 #define TITLE_STR2  ("20170807")
 
-#define BATTERY_CHECK_CYCLE (100)
+#define BATTERY_CHECK_CYCLE (1000)
 
 //--------------------------------------------------------------------------------
 // pin assign
@@ -305,8 +305,11 @@ void displayParamsI2CLCD(uint32_t frequency, int waveFormIndex)
   //lcd_clear();
 
   // 周波数表示
+  int million = frequency / 1000000;
+  int thouthand = (frequency - million * 1000000) / 1000;
+  int one = frequency - million * 1000000 - thouthand * 1000; 
   lcd_pos(0, 0);
-  sprintf(strBuffer, "%8luHz", frequency);
+  sprintf(strBuffer, "%02d,%03d,%03dHz", million, thouthand, one);
   lcd_puts(strBuffer);
 
   // 波形表示
@@ -454,8 +457,10 @@ void checkBattery()
   int v_real    = (int)voltage;  // 整数部
   int v_decimal = (int)((voltage - v_real) * 10); // 小数部１桁
   
-  sprintf(strBuffer, "%4d %4d.%d\V%", v, v_real, v_decimal);
-  lcd_pos(1, 4);
+  //sprintf(strBuffer, "%4d %4d.%d\V%", v, v_real, v_decimal);
+  //lcd_pos(1, 4);
+  sprintf(strBuffer, "%5d.%dV", v_real, v_decimal);
+  lcd_pos(1, 8);
   lcd_puts(strBuffer);
 }
 
