@@ -7,7 +7,7 @@
 #define CLOCK_8MHZ  (0) // 8MHz駆動する場合1にする。
 
 #define TITLE_STR1  ("AD9833 FG")
-#define TITLE_STR2  ("20170807")
+#define TITLE_STR2  ("20181031")
 
 #define BATTERY_CHECK_CYCLE (1000)
 
@@ -70,7 +70,10 @@ const uint32_t frequencyTable[] = {
   8,
   9,
   10,
+  12,
+  15,
   20,
+  25,
   30,
   40,
   50,
@@ -79,7 +82,10 @@ const uint32_t frequencyTable[] = {
   80,
   90,
   100,
+  120,
+  150,
   200,
+  250,
   300,
   400,
   500,
@@ -88,7 +94,10 @@ const uint32_t frequencyTable[] = {
   800,
   900,
   1000,
+  1200,
+  1500,
   2000,
+  2500,
   3000,
   4000,
   5000,
@@ -97,7 +106,10 @@ const uint32_t frequencyTable[] = {
   8000,
   9000,
   10000,
+  12000,
+  15000,
   20000,
+  25000,
   30000,
   40000,
   50000,
@@ -106,7 +118,10 @@ const uint32_t frequencyTable[] = {
   80000,
   90000,
   100000,
+  120000,
+  150000,
   200000,
+  250000,
   300000,
   400000,
   500000,
@@ -115,7 +130,10 @@ const uint32_t frequencyTable[] = {
   800000,
   900000,
   1000000,
+  1200000,
+  1500000,
   2000000,
+  2500000,
   3000000,
   4000000,
   5000000,
@@ -135,7 +153,7 @@ const int frequencyIndexMax = (sizeof(frequencyTable) / sizeof(uint32_t));
 // Variables
 //
 
-int frequencyIndex = 27; // 1kHz
+int frequencyIndex = 33; // 1kHz
 int waveFormIndex = 0;  // Sine wave
 
 int prevFrequencyIndex = -1;
